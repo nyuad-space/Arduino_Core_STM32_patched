@@ -74,7 +74,7 @@ enum SPITransferMode {
 
 class SPISettings {
   public:
-    constexpr SPISettings(uint32_t clock, BitOrder bitOrder, uint8_t dataMode, bool noRecv = SPI_TRANSMITRECEIVE)
+    constexpr SPISettings(uint32_t clock, BitOrder bitOrder, uint8_t dataMode, bool noRecv = SPI_TRANSMITRECEIVE, spi_device_mode deviceMode)
       : pinCS(-1),
         clk(clock),
         bOrder(bitOrder),
@@ -85,14 +85,16 @@ class SPISettings {
                 (SPI_MODE3 == dataMode) ? SPI_MODE_3 :
                 SPI_MODE0
               )),
-        noReceive(noRecv)
+        noReceive(noRecv),
+        deviceMode(deviceMode)
     { }
     constexpr SPISettings()
       : pinCS(-1),
         clk(SPI_SPEED_CLOCK_DEFAULT),
         bOrder(MSBFIRST),
         dMode(SPI_MODE_0),
-        noReceive(SPI_TRANSMITRECEIVE)
+        noReceive(SPI_TRANSMITRECEIVE),
+        deviceMode(SPI_MASTER)
     { }
   private:
     int16_t pinCS;      //CS pin associated to the configuration
@@ -106,6 +108,7 @@ class SPISettings {
     //SPI_MODE3             1                     1
     friend class SPIClass;
     bool noReceive;
+    spi_device_mode deviceMode, // Device mode, slave or master
 };
 
 class SPIClass {
@@ -148,7 +151,7 @@ class SPIClass {
       _spi.pin_ssel = (ssel);
     };
 
-    virtual void begin(uint8_t _pin = CS_PIN_CONTROLLED_BY_USER);
+    virtual void begin(uint8_t _pin = CS_PIN_CONTROLLED_BY_USER, spi_device_mode _device_mode = SPI_MASTER);
     void end(void);
 
     /* This function should be used to configure the SPI instance in case you
@@ -228,6 +231,17 @@ class SPIClass {
     SPI_HandleTypeDef *getHandle(void)
     {
       return &(_spi.handle);
+    }
+    
+    // Dedicated to SPI Slave
+    void attachSlaveInterrupt(uint8_t pin, callback_function_t callback)
+    {
+      ::attachInterrupt(pin, callback, FALLING);
+    }
+
+    void detachSlaveInterrupt(uint8_t pin)
+    {
+      ::detachInterrupt(pin);
     }
 
   protected:

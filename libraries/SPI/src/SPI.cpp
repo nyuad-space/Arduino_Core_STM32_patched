@@ -57,7 +57,7 @@ SPIClass::SPIClass(uint32_t mosi, uint32_t miso, uint32_t sclk, uint32_t ssel) :
   *         it gives the management of the CS pin to the SPI class. In this case
   *         do not manage the CS pin outside of the SPI class.
   */
-void SPIClass::begin(uint8_t _pin)
+void SPIClass::begin(uint8_t _pin, spi_device_mode _device_mode)
 {
   uint8_t idx = pinIdx(_pin, ADD_NEW_PIN);
   if (idx >= NB_SPI_SETTINGS) {
@@ -70,9 +70,11 @@ void SPIClass::begin(uint8_t _pin)
   }
 
   _spi.handle.State = HAL_SPI_STATE_RESET;
+  spiSettings[idx].deviceMode = _device_mode;
   spi_init(&_spi, spiSettings[idx].clk,
            spiSettings[idx].dMode,
-           spiSettings[idx].bOrder);
+           spiSettings[idx].bOrder,
+           spiSettings[idx].deviceMode);
   _CSPinConfig = _pin;
 #if __has_include("WiFi.h")
   // Wait wifi shield initialization.
@@ -104,6 +106,7 @@ void SPIClass::beginTransaction(uint8_t _pin, SPISettings settings)
   spiSettings[idx].dMode = settings.dMode;
   spiSettings[idx].bOrder = settings.bOrder;
   spiSettings[idx].noReceive = settings.noReceive;
+  spiSettings[idx].deviceMode = settings.deviceMode;
 
   if ((_pin != CS_PIN_CONTROLLED_BY_USER) && (_spi.pin_ssel == NC)) {
     pinMode(_pin, OUTPUT);
@@ -112,7 +115,8 @@ void SPIClass::beginTransaction(uint8_t _pin, SPISettings settings)
 
   spi_init(&_spi, spiSettings[idx].clk,
            spiSettings[idx].dMode,
-           spiSettings[idx].bOrder);
+           spiSettings[idx].bOrder,
+           spiSettings[idx].deviceMode);
   _CSPinConfig = _pin;
 }
 
@@ -153,7 +157,8 @@ void SPIClass::setBitOrder(uint8_t _pin, BitOrder _bitOrder)
 
   spi_init(&_spi, spiSettings[idx].clk,
            spiSettings[idx].dMode,
-           spiSettings[idx].bOrder);
+           spiSettings[idx].bOrder,
+           spiSettings[idx].deviceMode);
 }
 
 /**
@@ -187,7 +192,8 @@ void SPIClass::setDataMode(uint8_t _pin, uint8_t _mode)
 
   spi_init(&_spi, spiSettings[idx].clk,
            spiSettings[idx].dMode,
-           spiSettings[idx].bOrder);
+           spiSettings[idx].bOrder,
+           spiSettings[idx].deviceMode);
 }
 
 /**
@@ -212,7 +218,8 @@ void SPIClass::setClockDivider(uint8_t _pin, uint8_t _divider)
 
   spi_init(&_spi, spiSettings[idx].clk,
            spiSettings[idx].dMode,
-           spiSettings[idx].bOrder);
+           spiSettings[idx].bOrder,
+           spiSettings[idx].deviceMode);
 }
 
 /**
@@ -240,7 +247,8 @@ byte SPIClass::transfer(uint8_t _pin, uint8_t data, SPITransferMode _mode)
   if (_pin != _CSPinConfig) {
     spi_init(&_spi, spiSettings[idx].clk,
              spiSettings[idx].dMode,
-             spiSettings[idx].bOrder);
+             spiSettings[idx].bOrder
+             spiSettings[idx].deviceMode);
     _CSPinConfig = _pin;
   }
 
@@ -283,7 +291,8 @@ uint16_t SPIClass::transfer16(uint8_t _pin, uint16_t data, SPITransferMode _mode
   if (_pin != _CSPinConfig) {
     spi_init(&_spi, spiSettings[idx].clk,
              spiSettings[idx].dMode,
-             spiSettings[idx].bOrder);
+             spiSettings[idx].bOrder,
+             spiSettings[idx].deviceMode);
     _CSPinConfig = _pin;
   }
 
@@ -338,7 +347,8 @@ void SPIClass::transfer(uint8_t _pin, void *_buf, size_t _count, SPITransferMode
 
     spi_init(&_spi, spiSettings[idx].clk,
              spiSettings[idx].dMode,
-             spiSettings[idx].bOrder);
+             spiSettings[idx].bOrder,
+             spiSettings[idx].deviceMode);
     _CSPinConfig = _pin;
   }
 
@@ -382,7 +392,8 @@ void SPIClass::transfer(byte _pin, void *_bufout, void *_bufin, size_t _count, S
   if (_pin != _CSPinConfig) {
     spi_init(&_spi, spiSettings[idx].clk,
              spiSettings[idx].dMode,
-             spiSettings[idx].bOrder);
+             spiSettings[idx].bOrder,
+             spiSettings[idx].deviceMode);
     _CSPinConfig = _pin;
   }
 
