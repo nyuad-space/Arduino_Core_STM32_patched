@@ -247,7 +247,7 @@ byte SPIClass::transfer(uint8_t _pin, uint8_t data, SPITransferMode _mode)
   if (_pin != _CSPinConfig) {
     spi_init(&_spi, spiSettings[idx].clk,
              spiSettings[idx].dMode,
-             spiSettings[idx].bOrder
+             spiSettings[idx].bOrder,
              spiSettings[idx].deviceMode);
     _CSPinConfig = _pin;
   }

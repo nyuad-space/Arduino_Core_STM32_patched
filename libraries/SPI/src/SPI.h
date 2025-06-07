@@ -74,7 +74,7 @@ enum SPITransferMode {
 
 class SPISettings {
   public:
-    constexpr SPISettings(uint32_t clock, BitOrder bitOrder, uint8_t dataMode, bool noRecv = SPI_TRANSMITRECEIVE, spi_device_mode deviceMode)
+    constexpr SPISettings(uint32_t clock, BitOrder bitOrder, uint8_t dataMode, bool noRecv = SPI_TRANSMITRECEIVE, spi_device_mode deviceMode = SPI_MASTER)
       : pinCS(-1),
         clk(clock),
         bOrder(bitOrder),
@@ -108,7 +108,7 @@ class SPISettings {
     //SPI_MODE3             1                     1
     friend class SPIClass;
     bool noReceive;
-    spi_device_mode deviceMode, // Device mode, slave or master
+    spi_device_mode deviceMode; // Device mode, slave or master
 };
 
 class SPIClass {
